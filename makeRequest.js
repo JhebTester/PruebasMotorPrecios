@@ -4,9 +4,10 @@ const { escenarios_precios_mx, escenarios_precios_skus_aleatorios_mx } = require
 const promosProductList = require('./escenarios_promos.js');
 const validatePrecios = require('./validatePrecios.js');
 const escenarios_promos_mx = require('./escenarios_promos_mx.js');
-const { escenarios_precios_per, escenarios_precios_units_per, escenarios_precios_varios_SKU_per,escenarios_reales_per } = require('./escenarios_precios_per.js');
+const { escenarios_precios_per, escenarios_precios_units_per, escenarios_precios_varios_SKU_per, escenarios_reales_per } = require('./escenarios_precios_per.js');
 const { escenarios_precios_arg, escenarios_precios_units_arg, escenarios_precios_varios_SKU_arg, escenarios_reales_arg } = require('./escenarios_precios_arg.js');
 const validarMotorPrecios = require('./validatePrecios&Promos.js');
+const { obtenerDatosProducto, calculateTaxes } = require('./db2.js');
 //Argentina
 //https://dn.arcacontal.com/np/Promotions/development/PromotionBeta/ReviewOrderAsync/2024-08-31/1449782/4/6
 //Mexico
@@ -33,7 +34,7 @@ const escenarios_reales_arg_Object = escenarios_reales_arg[3];
 const escenarios_reales_per_Object = escenarios_reales_per[3];
 const escenarios_skus_aleatorios_mx = escenarios_precios_skus_aleatorios_mx[1];
 const escenarios_precios_mx_object = escenarios_precios_mx[0];
-const escenarios_promos_mx_object = escenarios_promos_mx[2];
+const escenarios_promos_mx_object = escenarios_promos_mx[0];
 //2, 3, 6, 7
 
 
@@ -52,6 +53,29 @@ async function getPriceData() {
         //validatePrecios(response.data, escenarios_promos_mx_object);
         validarMotorPrecios(response.data, escenarios_promos_mx_object);
         console.log("Request: ", JSON.stringify(escenarios_promos_mx_object));
+
+        console.log("Impuestos");
+        console.log("-----------------------------------------------------");
+
+        escenarios_promos_mx_object.products.forEach(product => {
+            obtenerDatosProducto(product.fkProductId)
+            .then(producto => {
+                if (producto) {
+                    //console.log(producto);
+                    producto.Quantity = product.quantity;
+                    producto.Discount = 0;
+                    producto.CountryId = 1;
+                    producto.TaxGroupId = 0;
+
+                    calculateTaxes(producto);
+
+                } else {
+                    console.log('Producto no encontrado');
+                }
+            })
+            .catch(err => console.error(err));
+        });
+       
     } catch (error) {
         console.error('Error al obtener los datos del precio:', error);
     }

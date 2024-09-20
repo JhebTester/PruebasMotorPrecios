@@ -13,8 +13,8 @@ const apiClient = axios.create({
 
 // Interceptor para agregar el token a cada solicitud
 apiClient.interceptors.request.use(async (config) => {
-  //let token = localStorage.getItem('accessToken');
-  let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InN0X2FyZ19hY2QyLjBAeW9wbWFpbC5jb20iLCJJZCI6IjE4OTE1ODM1IiwiVHlwZSI6IkN1c3RvbWVyIiwiTmFtZSI6IlVzdWFyaW8gUHJ1ZWJhIEFyZyBBQ0QgIiwiQXBwbGljYXRpb25JZCI6IjEiLCJDb3VudHJ5IjoiNCIsIkJ1cyI6IntcIjZcIjpbMTI2MjYxNywxNDQ5NzgyXX0iLCJCVSI6Ilt7XCJJZFwiOjYsXCJDbGllbnRJZFwiOjEyNjI2MTd9LHtcIklkXCI6NixcIkNsaWVudElkXCI6MTQ0OTc4Mn1dIiwibmJmIjoxNzI1ODMxMjg1LCJleHAiOjE3MjY0Mzc4ODUsImlhdCI6MTcyNTgzMzA4NX0.IF6TPXk4Kb-XOAHZMFRUq4356ZDujea0tl4Iahuk6ZA"
+  let token = localStorage.getItem('accessToken');
+  //let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InN0X2FyZ19hY2QyLjBAeW9wbWFpbC5jb20iLCJJZCI6IjE4OTE1ODM1IiwiVHlwZSI6IkN1c3RvbWVyIiwiTmFtZSI6IlVzdWFyaW8gUHJ1ZWJhIEFyZyBBQ0QgIiwiQXBwbGljYXRpb25JZCI6IjEiLCJDb3VudHJ5IjoiNCIsIkJ1cyI6IntcIjZcIjpbMTI2MjYxNywxNDQ5NzgyXX0iLCJCVSI6Ilt7XCJJZFwiOjYsXCJDbGllbnRJZFwiOjEyNjI2MTd9LHtcIklkXCI6NixcIkNsaWVudElkXCI6MTQ0OTc4Mn1dIiwibmJmIjoxNzI1ODMxMjg1LCJleHAiOjE3MjY0Mzc4ODUsImlhdCI6MTcyNTgzMzA4NX0.IF6TPXk4Kb-XOAHZMFRUq4356ZDujea0tl4Iahuk6ZA"
   
   if (!token || hasTokenExpired(token)) {
     token = await refreshToken();
