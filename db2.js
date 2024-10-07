@@ -39,8 +39,16 @@ async function obtenerDatosProducto(idProduct) {
 
 
 function calculateTaxes( data ){
+    const {FactoryNetPrice, Quantity} = data;
+    const FactoryNetPriceTotal = (FactoryNetPrice * Quantity) - data.Discount;
     const resultadoTaxes = calculateTaxesByCountry(data);
-    console.log("TaxesResult :", resultadoTaxes);
+    //console.log("TaxesResult From calculateTaxes:", resultadoTaxes);
+    const totalTaxes = Object.values(resultadoTaxes).reduce((total, value) => total + value, 0);
+    const total = FactoryNetPriceTotal + totalTaxes;
+    const result = {fkProductId: data.FkProductId , FactoryNetPriceTotal: FactoryNetPriceTotal, totalTaxes: totalTaxes, Total: total };
+
+    return result;
+    //console.log("TaxesResult :", result);
 }
 
 function calculateTaxesByCountry(productObject) {

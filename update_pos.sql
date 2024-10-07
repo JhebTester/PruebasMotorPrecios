@@ -1,17 +1,36 @@
+--Insertar listas de precios
+
 INSERT INTO [beta].[PriceListCustomers] (
       ,[BusinessCode]
       ,[CustomerCode]
       ,[FkAppUserId]
       ,[FkPointOfSalesId])
 VALUES 
-(4, '8072934', '18915941', 30000101),
-(4, '7301222', '18915942', 30000102),
-(4, '8081466', '18915943', 30000103),
-(4, '0824614', '18915944', 30000104),
-(4, '0820890', '18915945', 30000105),
-(4, '0057609', '18915946', 30000106),
-(4, '1117748', '18915947', 30000107),
-(4, '1077124', '18915948', 30000108),
-(4, '0036065', '18915949', 30000109),
-(4, '1511534', '18915950', 30000110)
+(1, '0500222508', '18915886', 30000101)
 ;
+
+
+--Insertar configuraciones de carrito asíncrono
+/*
+Id	BusinessCode	CustomerCode	FkAppUserId	      FkPointOfSalesId
+125	1	            0500222508	      18915886	      11000
+*/
+
+INSERT INTO [dbo].[CmsConfigsSalesOffice]
+      ([Id]
+      ,[CountryId]
+      ,[BusinessUnitId]
+      ,[SalesOfficeId]
+      ,[Key]
+      ,[Value]
+      ,[DateCreated])
+	VALUES 
+	(NEWID(),1,1,'09','ASYNC_SHOPPING_CART','true',SYSDATETIME()),
+	(NEWID(),1,1,'13','ASYNC_SHOPPING_CART','true',SYSDATETIME()),
+	(NEWID(),1,1,'12','ASYNC_SHOPPING_CART','true',SYSDATETIME()),
+	(NEWID(),1,1,'37','ASYNC_SHOPPING_CART','true',SYSDATETIME()),
+	(NEWID(),1,1,'43','ASYNC_SHOPPING_CART','true',SYSDATETIME());
+
+--- Actualizar moneda de Perú
+
+ UPDATE [dbo].[CmsConfigs] SET Currency = 'S/' WHERE [CountryId] = 2 ;

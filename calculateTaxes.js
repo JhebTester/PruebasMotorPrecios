@@ -13,7 +13,7 @@ function calculateTaxesMX(data) {
 
 function calculateTaxesPER(data) {
 
-    const { FactoryNetPrice, Quantity, Discount, Tax2, Tax4, TaxPct3, TaxPct1 } = data;
+    const { FactoryNetPrice, Quantity, Discount, TaxPct3, TaxPct1,TaxPct2 } = data;
     const ISC = ((FactoryNetPrice * Quantity) - Discount) * (TaxPct1 / 100)
     const IGV = ((FactoryNetPrice * Quantity) - Discount) * (TaxPct2 / 100)
     const PERCEPCION_IVA = ((FactoryNetPrice * Quantity) - Discount) * (TaxPct3 / 100)

@@ -21,7 +21,7 @@ function validarMotorPrecios(response, productsObject) {
         const beneficioProductListtemp = encontrarProductosEnMap(productListBeneficio, ProductsMap);
         //console.log("beneficioProductListtemp: ", beneficioProductListtemp);
 
-        let { subtotalCalculadoPerPromotion, subtotalConDescuentoManual, taxesCalculadosPerPromotion, totalManual, descuentoTotal } = validatePromotions(response.promotions, beneficioProductListtemp, productListBeneficio);
+        let { subtotalCalculadoPerPromotion, subtotalConDescuentoManual, taxesCalculadosPerPromotion, totalManual, descuentoTotal, descuentoPerProductoList } = validatePromotions(response.promotions, beneficioProductListtemp, productListBeneficio);
         totalManual = totalManual + totalSinPromo;
         console.log("Total descuento manual :", descuentoTotal);
         console.log("Total CalculadoManual con promocion :", totalManual);
@@ -32,13 +32,14 @@ function validarMotorPrecios(response, productsObject) {
             subtotalConDescuentoManual,
             taxesCalculadosPerPromotion,
             totalManual,
-            descuentoTotal
+            descuentoTotal,
+            descuentoPerProductoList
         };
 
 
     } else {
         if (response.promotions && response.promotions.length > 0) {
-            const { subtotalCalculadoPerPromotion, subtotalConDescuentoManual, taxesCalculadosPerPromotion, totalManual, descuentoTotal } = validatePromotions(response.promotions, response.order[0].products, productsObject.products);
+            const { subtotalCalculadoPerPromotion, subtotalConDescuentoManual, taxesCalculadosPerPromotion, totalManual, descuentoTotal, descuentoPerProductoList } = validatePromotions(response.promotions, response.order[0].products, productsObject.products);
             console.log("Total descuento manual :", descuentoTotal);
             console.log(`Subtotal calculado manual: ${subtotalCalculadoPerPromotion}`);
             console.log(`Subtotal Con Descuento calculado manual: ${subtotalConDescuentoManual}`);
@@ -51,14 +52,23 @@ function validarMotorPrecios(response, productsObject) {
                 subtotalConDescuentoManual,
                 taxesCalculadosPerPromotion,
                 totalManual,
-                descuentoTotal
+                descuentoTotal,
+                descuentoPerProductoList
             };
 
         } else {
-
             const totalCalculadoManual = calcularTotalSinPromocion(response.order[0].products, productsObject.products);
             console.log("totalCalculadoManual :", totalCalculadoManual);
             console.log("Total en la app: ", totalApp);
+            
+            return {
+                subtotalCalculadoPerPromotion: totalCalculadoManual,
+                subtotalConDescuentoManual: totalCalculadoManual,
+                taxesCalculadosPerPromotion: 0,
+                totalManual: totalCalculadoManual,
+                descuentoTotal: 0,
+                descuentoPerProductoList: []
+            };
         }
     }
 
@@ -174,12 +184,12 @@ function calcularPromocion(promotionsProductsMap = {}) {
     let subtotalCalculadoPerPromotion = 0;
     let taxesCalculadosPerPromotion = 0;
     let descuentoTotal = 0;
-
+    let descuentoPerProductoList = [];
     promotionsProductsMap.forEach((products, promotionId) => {
         // products es un array de objetos con el mismo promotionId
         let product_promotion = {};
         console.log(`Promoción ${promotionId}:`);
-        let quantityTemp = 0;
+        
 
         let productLessQuantity = {
             quantity: 0,
@@ -189,29 +199,49 @@ function calcularPromocion(promotionsProductsMap = {}) {
             productLessQuantity = calculoRequireQuantity_Quantity(products);
             console.log("productLessQuantity", productLessQuantity);
         }
+        let subtotalConDescuentoManualPerProducto = 0;
+        let descuentoPerProducto = 0;
+
+        const subtotalCalculado = products.reduce((acc, product) => {
+            return acc + product.unitPrice * product.quantity;
+          }, 0);
+
+          let quantityAllProducts = products.reduce((acc, product) => acc + product.quantity, 0);
+        
 
         products.forEach(product => {
             //console.log(`  Producto: ${product.productId}, Precio: ${product.unitPrice}, Quantity: ${product.quantity}, Units: ${product.units}`);
-            subtotalCalculadoPerPromotion += product.unitPrice * product.quantity;
+            let subtotalCalculadoPerProducto = product.unitPrice * product.quantity;
             taxesCalculadosPerPromotion += sumaImpuestos(product.taxes);
-            quantityTemp += product.quantity;
+            //quantityAllProducts += product.quantity;
 
             //Se establecen los detalles generales de la promocion
             product_promotion = {
                 promotionType: product.promotionType,
-                subtotalCalculado: subtotalCalculadoPerPromotion,
+                subtotalCalculado: subtotalCalculado,
+                subtotalCalculadoPerProducto: subtotalCalculadoPerProducto,
                 rewardValue: product.rewardValue,
                 promotionMaxValue: product.promotionMaxValue,
-                quantity: isMultipleRequisito ? productLessQuantity.quantity : quantityTemp,
+                quantityAllProducts : quantityAllProducts,
+                quantity: isMultipleRequisito ? productLessQuantity.quantity : product.quantity,
                 requiredQuantity: isMultipleRequisito ? productLessQuantity.requiredQuantity : product.requiredQuantity,
                 quantityProducts: products.length
             }
+            
+            let {priceWithDisccount, discount}  = calcularPrecioCondescuento(product_promotion);
+            subtotalConDescuentoManualPerProducto += priceWithDisccount;
+            descuentoPerProducto += discount;
+            descuentoPerProductoList.push({
+                productId: product.productId,
+                discount: discount,
+                priceWithDisccount: priceWithDisccount
+            });
 
         });
-
-        let {priceWithDisccount, discount}  = calcularPrecioCondescuento(product_promotion);
-        subtotalConDescuentoManual += priceWithDisccount;
-        descuentoTotal += discount;
+        
+        
+        subtotalConDescuentoManual += subtotalConDescuentoManualPerProducto;
+        descuentoTotal += descuentoPerProducto;
         totalManual += (subtotalConDescuentoManual + taxesCalculadosPerPromotion);
     });//Fin
 
@@ -221,7 +251,8 @@ function calcularPromocion(promotionsProductsMap = {}) {
         taxesCalculadosPerPromotion: taxesCalculadosPerPromotion,
         descuentoTotal: descuentoTotal,
         totalManual: totalManual,
-        totalApp: totalApp
+        totalApp: totalApp,
+        descuentoPerProductoList: descuentoPerProductoList
     }
 
 
@@ -243,20 +274,20 @@ function calcularPrecioCondescuento(product_promotion = {}) {
     //Porcentaje
     if (product_promotion.promotionType == "ZA02") {
         discount = ((product_promotion.subtotalCalculado * product_promotion.rewardValue) / 100);
-        discount = (discount >= product_promotion.promotionMaxValue) ? product_promotion.promotionMaxValue : discount;
+        discount = (discount >= product_promotion.promotionMaxValue) ? (product_promotion.promotionMaxValue / product_promotion.quantityProducts)  : discount;
         discount = isMultipleRequisito ? discount * product_promotion.quantityProducts : discount;
-        priceWithDisccount = product_promotion.subtotalCalculado - discount;
+        priceWithDisccount = product_promotion.subtotalCalculadoPerProducto - discount;
     } else {
         //monto
         if (product_promotion.promotionType == "ZA03") {
-            discount = product_promotion.rewardValue * calcularVecesCumpleValorRequerido(product_promotion.quantity, product_promotion.requiredQuantity);
-            discount = (discount >= product_promotion.promotionMaxValue) ? product_promotion.promotionMaxValue : discount;
+            discount = isMultipleRequisito ? product_promotion.rewardValue * calcularVecesCumpleValorRequerido(product_promotion.quantity, product_promotion.requiredQuantity) : product_promotion.rewardValue * calcularVecesCumpleValorRequerido(product_promotion.quantityAllProducts, product_promotion.requiredQuantity);
+            discount = (discount >= product_promotion.promotionMaxValue) ? (product_promotion.promotionMaxValue / product_promotion.quantityProducts) : discount / product_promotion.quantityProducts;
             discount = isMultipleRequisito ? discount * product_promotion.quantityProducts : discount;
-            priceWithDisccount = product_promotion.subtotalCalculado - discount;
+            priceWithDisccount = product_promotion.subtotalCalculadoPerProducto - discount;
         } else {
             //regalo
             discount = 0;
-            priceWithDisccount = product_promotion.subtotalCalculado;
+            priceWithDisccount = product_promotion.subtotalCalculadoPerProducto;
         }
     }
 

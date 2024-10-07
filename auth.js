@@ -29,11 +29,38 @@ const users = [
   }
 ];
 
+async function getBearerToken() {
+  const data = {
+    grant_type: 'client_credentials',
+    client_id: 'af9516dd-1ee0-4adf-96ee-a6c64d4c18f8',
+    scope: 'https://B2BADDEV.onmicrosoft.com/af9516dd-1ee0-4adf-96ee-a6c64d4c18f8/.default',
+    client_secret: '1VB8Q~HGe.W1bUnMrYZQmq6Q5-4.XP3ykFVTLcvK'
+  };
+  
+  const headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+  };
+  
+  axios.post('https://login.microsoftonline.com/common/oauth2/v2.0/token', data, { headers })
+    .then(response => {
+      const token = response.data.access_token; // Adapt this based on the response structure
+      
+      localStorage.setItem('access_Token', token);
+    })
+    .catch(error => {
+      console.error('Error obtaining token:', error);
+    });
+}
+
 async function login() {
+
+  await getBearerToken();
+  const bearerToken = localStorage.getItem('access_Token');
+  console.log('Token obtained:', bearerToken);
   try {
-    const response = await axios.post('https://dn.arcacontal.com/np/Users/development/User/SignInExt', users[0], {
+    const response = await axios.post('https://dn.arcacontal.com/np/Users/development/User/SignInExt', users[1], {
       headers: {
-        "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ikg5bmo1QU9Tc3dNcGhnMVNGeDdqYVYtbEI5dyJ9.eyJhdWQiOiJhZjk1MTZkZC0xZWUwLTRhZGYtOTZlZS1hNmM2NGQ0YzE4ZjgiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vZDA3NWMyZjUtMmY5MC00NDNlLWJmOWEtNDQ0MzI3MDRlNTJjL3YyLjAiLCJpYXQiOjE3MjY4MTYzNDUsIm5iZiI6MTcyNjgxNjM0NSwiZXhwIjoxNzI2ODIwMjQ1LCJhaW8iOiJBU1FBMi84WEFBQUF2Y3BxTnBuYTZDZ1BWY1lsWW5xUkFsdjd4RFIyb1pBZ0tlZ3Yrclg2cXlBPSIsImF6cCI6ImFmOTUxNmRkLTFlZTAtNGFkZi05NmVlLWE2YzY0ZDRjMThmOCIsImF6cGFjciI6IjEiLCJvaWQiOiJhMGUxMzg0OC00NTMxLTQ5NDItODdmOC0zZGMzMzc5NjdhYjkiLCJyaCI6IjAuQVIwQTljSjEwSkF2UGtTX21rUkRKd1RsTE4wV2xhX2dIdDlLbHU2bXhrMU1HUGdkQUFBLiIsInN1YiI6ImEwZTEzODQ4LTQ1MzEtNDk0Mi04N2Y4LTNkYzMzNzk2N2FiOSIsInRpZCI6ImQwNzVjMmY1LTJmOTAtNDQzZS1iZjlhLTQ0NDMyNzA0ZTUyYyIsInV0aSI6InRlX1lad2ZfNTBHNlc4U3U0eGtzQUEiLCJ2ZXIiOiIyLjAifQ.Gv8nuvI-5JajLoJDQmwRIL5UbUNgI-VlJ-9KT2qyGoKKFTUuWPWIsHRG7W7istGaOhiSHkvJZztlsMPExpkB32szu5H13BKqB4MzhgTyRXyaNxI4InjsePHZytA46mpQLCjTXabAmtGmaSVR4ZBrGgt9qnMErZv4E9c9IRBqIROy3VvW9g6-Dcx9yZAqynY2jIrOK5vlSACl_kHhLmySPF89xtvEV300IMugiiMpZrtzdlMiu_ZmdBsnvNSM_qH2nqGn7GZXctFBxT1YNiiys1vBmrlDS7n7KlTqt6VNBzwSjefWvB2oAAn7LSiPI6ATrNIzOCBryyS6qTwO5cAY8g",
+        "Authorization": "Bearer " + bearerToken,
         "Content-Type": "application/json",
       }
     });

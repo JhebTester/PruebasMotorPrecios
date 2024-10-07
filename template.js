@@ -1,152 +1,23 @@
-function compararListas(lista1, lista2) {
-    // Convertimos las listas a conjuntos para eliminar duplicados y facilitar las comparaciones
-    const conjunto1 = new Set(lista1);
-    const conjunto2 = new Set(lista2);
-  
-    // Encontramos los elementos que están en el conjunto 1 pero no en el 2
-    const soloEn1 = [...conjunto1].filter(x => !conjunto2.has(x));
-  
-    // Encontramos los elementos que están en el conjunto 2 pero no en el 1
-    const soloEn2 = [...conjunto2].filter(x => !conjunto1.has(x));
-  
-    return {
-      soloEn1,
-      soloEn2
-    };
-  }
-  
-  //, Ejemplo de uso
-  const allFkProducts = [
-    2983,
-    2984,
-    2991,
-    2992,
-    2993,
-    2996,
-    2998,
-    3003,
-    3004,
-    3005,
-    3007,
-    3011,
-    3024,
-    3027,
-    3028,
-    3030,
-    3031,
-    3032,
-    3053,
-    3054,
-    3055,
-    3056,
-    3057,
-    3058,
-    3064,
-    3066,
-    3067,
-    3069,
-    3070,
-    3072,
-    3074,
-    3085,
-    3086,
-    3087,
-    3088,
-    3089,
-    3090,
-    3091,
-    3092,
-    3093,
-    3094,
-    3096,
-    3097,
-    3098,
-    3099,
-    3100,
-    3101,
-    3103,
-    3104,
-    3105,
-    3107,
-    3108,
-    3109,
-    3110,
-    3112,
-    3113,
-    3124,
-    3126,
-    3128,
-    3135,
-    3136,
-    3138,
-    3141,
-    3142,
-    4905,
-    4906,
-    4910,
-    4911,
-    4916,
-    5036,
-    6418,
-    7099,
-    7162,
-    7163,
-    7164,
-    8333,
-    10909,
-    10912,
-    11047,
-    11054,
-    11080,
-    11081,
-    11325,
-    11326,
-    11512,
-    12032,
-    12033,
-    12969,
-    12970,
-    13013,
-    13014,
-    13033,
-    13034,
-    13137,
-    13138,
-    13141,
-    13142,
-    13272,
-    13273,
-    13292,
-    13316,
-    13317,
-    13318,
-    13319,
-    13946,
-    13951,
-    13956,
-    14091,
-    15209,
-    15244,
-    15245,
-    15306,
-    15421,
-    15422,
-    15432,
-    15710,
-    16404,
-    16405,
-    17101,
-    17102];
-  const productSugestedID = [
-    2983,
-2984,
-2985,
-7099,
-7162,
-2991,
-  ];
-  
-  const resultado = compararListas(allFkProducts, productSugestedID);
-  
-  console.log("Elementos solo en listaA:", resultado.soloEn1);
-  console.log("Elementos solo en listaB:", resultado.soloEn2);
+function calcularDiferenciaFechas(fechaObjetivo) {
+  // Convertir la fecha objetivo a un objeto Date
+  const fechaObjetivoObj = new Date(fechaObjetivo);
+
+  // Obtener la fecha y hora actual
+  const fechaActual = new Date('2024-09-25 00:00:00.0000000');
+
+  // Calcular la diferencia en milisegundos
+  const diferenciaMilisegundos = fechaObjetivoObj - fechaActual;
+
+  // Convertir la diferencia a días, horas, minutos y segundos
+  const dias = Math.floor(diferenciaMilisegundos / (1000 * 60 * 60 * 24));
+  const horas = Math.floor((diferenciaMilisegundos % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutos = Math.floor((diferenciaMilisegundos % (1000 * 60 * 60)) / (1000 * 60));
+  const segundos = Math.floor((diferenciaMilisegundos % (1000 * 60)) / 1000);
+
+  // Mostrar el resultado
+  console.log(`Restan ${dias} días, ${horas} horas, ${minutos} minutos y ${segundos} segundos.`);
+}
+
+// Ejemplo de uso:
+const fechaFutura = '2024-09-26 20:00:00.0000000';
+calcularDiferenciaFechas(fechaFutura);
